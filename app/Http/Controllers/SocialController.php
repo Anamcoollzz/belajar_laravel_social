@@ -32,4 +32,34 @@ class SocialController extends Controller
             ]);
         }
     }
+
+    public function facebookRedirect()
+    {
+        return Socialite::driver('facebook')->redirect();
+    }
+
+    public function facebookCallback()
+    {
+        $user = Socialite::driver('facebook')->user();
+        $avatar = $user->getAvatar();
+
+        $user = \App\Models\User::firstOrCreate([
+            'email' => $user->email,
+        ], [
+            'name' => $user->getName(),
+            'password' => bcrypt('12345'),
+        ]);
+
+        if ($user) {
+            Auth::login($user);
+            return view('facebook-logged-in', [
+                'user' => $user,
+                'avatar' => $avatar,
+            ]);
+        } else {
+            return view('facebook-logged-in', [
+                'user' => null
+            ]);
+        }
+    }
 }
